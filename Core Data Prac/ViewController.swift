@@ -14,25 +14,25 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     
     var tasks: [TaskEntity] = []
     
-    override func viewDidLoad() {
+    override func viewDidLoad()
+    {
         super.viewDidLoad()
         tableView.dataSource = self
         tableView.delegate = self
     }
     
-    override func viewWillAppear(_ animated: Bool) {
-        // get data
-        getData()
-        
-        // reload table view
-        tableView.reloadData()
+    override func viewWillAppear(_ animated: Bool)
+    {
+        getAndReloadData()
     }
     
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int
+    {
         return tasks.count
     }
     
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell
+    {
         let cell = UITableViewCell()
         let task = tasks[indexPath.row]
         
@@ -44,10 +44,27 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         return cell
     }
     
-    func getData() {
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath)
+    {
+        let viewContext = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+        
+        if editingStyle == .delete
+        {
+            let task = tasks[indexPath.row]
+            viewContext.delete(task)
+            (UIApplication.shared.delegate as! AppDelegate).saveContext()
+            getAndReloadData()
+        }
+    }
+    
+    func getAndReloadData()
+    {
         let viewContext = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
         do {
             tasks = try viewContext.fetch(TaskEntity.fetchRequest())
+            
+            // reload table view
+            tableView.reloadData()
         } catch {
             print("Fetching failed")
         }
